@@ -7,6 +7,7 @@ import {
   type CommandArgument,
   type CommandOption
 } from '@/types/command/command.types'
+import { CreateVariableRequestSchema } from '@keyshade/schema/raw'
 
 export default class CreateVariable extends BaseCommand {
   getName(): string {
@@ -72,14 +73,25 @@ export default class CreateVariable extends BaseCommand {
       return
     }
 
+    const payload = {
+      name,
+      note,
+      entries
+    }
+
+    const parsedPayload = CreateVariableRequestSchema.safeParse(payload)
+
+    if (!parsedPayload.success) {
+      Logger.error('Invalid input:')
+      for (const issue of parsedPayload.error.issues) {
+        Logger.error(`- ${issue.path.join('.') || 'input'} : ${issue.message}`)
+      }
+      return
+    }
+
     const { data, error, success } =
       await ControllerInstance.getInstance().variableController.createVariable(
-        {
-          name,
-          note,
-          entries,
-          projectSlug
-        },
+        parsedPayload.data,
         this.headers
       )
 
