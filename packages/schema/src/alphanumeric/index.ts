@@ -30,3 +30,13 @@ export const ColorCodeAlphaNumericStringSchema = z
   .refine((val) => /^[0-9A-F]+$/.test(val), {
     message: 'Color code alphanumeric string must be a valid hex color code'
   })
+
+export const EmailAlphaNumericStringSchema = z
+  .string() // purpose: ensures input is a string, preventing non-str. values from being processed.
+  .regex(/^[a-zA-Z0-9]+$/)
+  .email() // purpose: zod library schema method validates incoming email, preventing special characters from being inputted.
+  .refine((val) => val.length > 0, {
+    // purpose: second measure against empty string once parsed as email via zod method
+    message:
+      'Email alphanumeric string must be a valid email address and cannot contain non-alphanumeric characters'
+  })
