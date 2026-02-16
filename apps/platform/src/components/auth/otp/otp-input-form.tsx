@@ -14,6 +14,7 @@ import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { userAtom } from '@/store'
 import { isEmailValid } from '@/lib/is-email-valid'
+import { OneTimePasswordStringSchema } from '@keyshade/schema/src/alphanumeric'
 
 interface OtpInputFormProps {
   isLoading: boolean
@@ -91,6 +92,7 @@ export default function OtpInputForm({
     }
   }
 
+  //(OTP FOCUS) changes will be made here @ the otp alphanumeric checker to correspond with schema alphanumeric
   const isAlphanumeric = (value: string): boolean => {
     const result = z
       .string()
@@ -101,6 +103,13 @@ export default function OtpInputForm({
       .safeParse(value)
 
     return result.success
+  }
+
+  const isAlphanumericTest = (valid: string): boolean =>{
+    // refactor for input OTP validation schema within Alphanumeric schema
+    const  result  = OneTimePasswordStringSchema.safeParse(valid) // parse to index.ts in schema
+
+    return result.success;
   }
 
   const isButtonDisabled = (): boolean => {

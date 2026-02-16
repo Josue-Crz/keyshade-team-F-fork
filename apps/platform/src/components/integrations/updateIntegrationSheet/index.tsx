@@ -147,6 +147,7 @@ function UpdateIntegration({
     return finalMetadata
   }, [name, selectedEvents, metadata, envMappings, isMappingRequired])
 
+  // Focus After otp: "update integration"?
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()

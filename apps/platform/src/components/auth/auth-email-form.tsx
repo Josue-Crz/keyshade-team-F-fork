@@ -33,6 +33,7 @@ export default function AuthEmailForm() {
 
     if (!isEmailValid(email)) {
       setIsInvalidEmail(true)
+      toast.error("Invalid email address") // Josue Change: made a change that adds a toast msg for invalid email
       return
     }
 

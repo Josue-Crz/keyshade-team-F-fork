@@ -12,7 +12,7 @@ export function isEmailValid(value: string | null | undefined): boolean {
     return false
   }
 
-  // purpose: to ensure an no special characters come from email input
+  // purpose: to ensure no special characters come from email input, acts a secondary measure
   const { success } = EmailAlphaNumericStringSchema.safeParse(value)
 
   return success

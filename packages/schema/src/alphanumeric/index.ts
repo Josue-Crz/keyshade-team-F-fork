@@ -33,10 +33,22 @@ export const ColorCodeAlphaNumericStringSchema = z
 
 export const EmailAlphaNumericStringSchema = z
   .string() // purpose: ensures input is a string, preventing non-str. values from being processed.
-  .regex(/^[a-zA-Z0-9]+$/)
+  .regex(/^[a-zA-Z0-9!#$%&'*+-/=?^_`{|}]+$/) // Addition: valid email characters within regex
   .email() // purpose: zod library schema method validates incoming email, preventing special characters from being inputted.
   .refine((val) => val.length > 0, {
     // purpose: second measure against empty string once parsed as email via zod method
-    message:
-      'Email alphanumeric string must be a valid email address and cannot contain non-alphanumeric characters'
+    message: 'Email must have alphanumeric and email validating characters'
   })
+
+// FIXME: define all the schemas on the frontend, this includes: OneTimePasswordStringSchema,   
+export const OneTimePasswordStringSchema = z // FIXME: begin working on the one time password schema
+  .string()
+  .length(6)
+  .refine((str) => /^[a-z0-9]+$/i.test(str), {
+         message: 'OTP must be alphanumeric'
+  })
+
+// purpose: templates of editing/new page title actions that must be put through before completing
+export const NewPageTitleStringSchema = z
+
+export const EditPageTitleStringSchema = z
