@@ -1,14 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- ignore */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment -- ignore */
+/* eslint-disable @typescript-eslint/no-unsafe-return -- ignore */
+/* eslint-disable @typescript-eslint/no-unused-vars -- ignore */
 /* eslint-disable no-console -- ignore */
 
 'use client'
-import React, { useEffect, useState } from 'react'
-import { Particles, initParticlesEngine } from '@tsparticles/react'
+import React, { Suspense, useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import type { Container, SingleOrMultiple } from '@tsparticles/engine'
+import { initParticlesEngine } from '@tsparticles/react'
 import { loadSlim } from '@tsparticles/slim'
 import { motion, useAnimation } from 'framer-motion'
 import { cn } from '@/utils/cn'
+
+const Particles = dynamic(
+  () => import('@tsparticles/react').then((mod) => mod.Particles as any),
+  {
+    ssr: false,
+    loading: () => <div className={cn('h-full w-full')} />
+  }
+) as any
 
 interface ParticlesProps {
   id?: string

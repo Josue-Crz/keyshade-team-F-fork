@@ -1,6 +1,6 @@
 'use client'
 import { Copy } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import React, { ElementType, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import ShareSecretPassword from '../shareSecretPassword'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,7 @@ interface ViewShareSecretProps {
   setError: (error: string) => void
 }
 
-function ViewShareSecret({ secretHash, setError }: ViewShareSecretProps) {
+function ViewShareSecret({ secretHash, setError }: ViewShareSecretProps): React.ReactElement {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [secret, setSecret] = useState<string>('')
   const [isPasswordRequired, setIsPasswordRequired] = useState<boolean>(false)
@@ -95,7 +95,7 @@ function ViewShareSecret({ secretHash, setError }: ViewShareSecretProps) {
               onClick={handleCopyToClipboard}
               variant="ghost"
             >
-              <Copy />
+              {React.createElement(Copy as ElementType)}
             </Button>
           </div>
           <Textarea

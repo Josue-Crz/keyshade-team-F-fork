@@ -1,13 +1,19 @@
 import { exec } from 'child_process'
+import { resolve } from 'path'
 
 export default async function teardown() {
-  await executeCommand('docker compose -f ../../docker-compose-test.yml down')
+  const rootDir = resolve(__dirname, '../../..')
+  await executeCommand('docker-compose down', { cwd: rootDir })
   process.exit(0)
 }
 
-function executeCommand(command: string): Promise<void> {
+function executeCommand(
+  command: string,
+  options?: Record<string, string | undefined>
+): Promise<void> {
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    const { cwd, ...env } = options || {}
+    exec(command, { cwd, env }, (error, stdout, stderr) => {
       console.log('Executing: ', command)
       if (error) {
         console.error('Error:', stderr)

@@ -1,12 +1,12 @@
-import React from 'react'
 import Link from 'next/link'
 import { FooterLogoSVG } from '@public/shared'
 import { SparklesCore } from '@/components/ui/sparkles'
 import EncryptText from '@/components/ui/encrypt-text'
+import { JSX } from 'react/jsx-runtime'
 
 // import EncryptButton from '@/components/ui/encrypt-btn'
 
-function Footer(): React.JSX.Element {
+function Footer(): JSX.Element {
   return (
     <footer className="my-[10vw] flex w-full flex-col items-center">
       <div className="flex w-full items-center justify-center">

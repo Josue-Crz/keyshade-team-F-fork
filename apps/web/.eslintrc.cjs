@@ -8,7 +8,10 @@ module.exports = {
   rules: {
     '@typescript-eslint/explicit-function-return-type': 'off',
     'turbo/no-undeclared-env-vars': 'off',
-    'eslint-comments/no-unused-disable': 'off'
+    'eslint-comments/no-unused-disable': 'off',
+    '@typescript-eslint/dot-notation': ['error', { allowKeywords: true, allowPattern: '^[a-z]+(_[a-z]+)+$' }],
+    '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions', 'functions', 'methods'] }],
+    'no-html-link-for-pages': 'off'
   },
   overrides: [
     {

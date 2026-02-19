@@ -1,5 +1,5 @@
 import { Copy } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import React, { ElementType, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,7 +10,7 @@ interface ShareSecretLinkProps {
   shareHash: string
 }
 
-function ShareSecretLink({ shareHash }: ShareSecretLinkProps) {
+function ShareSecretLink({ shareHash }: ShareSecretLinkProps): React.ReactElement {
   const [email, setEmail] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -77,7 +77,7 @@ function ShareSecretLink({ shareHash }: ShareSecretLinkProps) {
             }}
             variant="ghost"
           >
-            <Copy />
+            {React.createElement(Copy as ElementType)}
           </Button>
         </div>
       </div>

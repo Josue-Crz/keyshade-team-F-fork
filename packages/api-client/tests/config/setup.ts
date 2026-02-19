@@ -1,39 +1,61 @@
-import { exec } from 'child_process'
+import { exec, spawn } from 'child_process';
 
-export default async function teardown() {
-  await executeCommand('docker compose down')
-  await executeCommand('docker compose -f ../../docker-compose-test.yml up -d')
-  await executeCommand('cd ../.. && pnpm build:api')
-  await executeCommand('cd ../.. && sleep 2 && pnpm db:deploy-migrations', {
-    DATABASE_URL: 'postgresql://prisma:prisma@localhost:5432/tests',
-    PATH: process.env.PATH!
-  })
-  await startAPI()
+export default async function setup() {
+  console.log('--- Starting Global Setup ---');
+  
+  await executeCommand('docker-compose down');
+  await executeCommand('docker-compose -f ../../docker-compose-test.yml up -d');
+  await executeCommand('pnpm build:api', { cwd: '../../' });
+  
+  // Replace the "sleep" command with a real delay
+  console.log('Waiting 2 seconds for DB...');
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  await executeCommand('pnpm db:deploy-migrations', {
+    cwd: '../../',
+    env: {
+      ...process.env,
+      DATABASE_URL: 'postgresql://prisma:prisma@localhost:5432/tests',
+    }
+  });
+
+  await startAPI();
+  console.log('--- Global Setup Finished ---');
 }
 
 function executeCommand(
   command: string,
-  env?: Record<string, string>
+  options: { env?: Record<string, string>; cwd?: string } = {}
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    exec(command, { env }, (error, stdout, stderr) => {
-      console.log('Executing: ', command)
+    console.log(`Executing: ${command}`); // Log BEFORE running
+    
+    exec(command, { 
+      env: options.env || process.env, 
+      cwd: options.cwd,
+      maxBuffer: 1024 * 1024 * 10 // Increase buffer to 10MB
+    }, (error, stdout, stderr) => {
       if (error) {
-        stderr && console.error('Error:', stderr)
-        reject(error)
+        console.error(`Command failed: ${command}`);
+        console.error(stderr);
+        reject(error);
       } else {
-        stdout && console.log('Output:', stdout)
-        resolve()
+        // stdout && console.log(stdout); // Optional: verbose logging
+        resolve();
       }
-    })
-  })
+    });
+  });
 }
 
 function startAPI(): Promise<void> {
   return new Promise((resolve) => {
-    const apiProcess = exec('pnpm run --filter=api start', {
+    console.log('Launching API via spawn...');
+    
+    // Use spawn instead of exec for long-running services to avoid buffer issues
+    const apiProcess = spawn('pnpm', ['run', '--filter=api', 'start'], {
+      shell: true, // Required for Windows
       env: {
-        PATH: process.env.PATH,
+        ...process.env,
         DATABASE_URL: 'postgresql://prisma:prisma@localhost:5432/tests',
         REDIS_URL: 'redis://localhost:6379',
         JWT_SECRET: 'secret',
@@ -41,20 +63,20 @@ function startAPI(): Promise<void> {
         DOMAIN: 'localhost',
         API_PORT: '4200'
       }
-    })
+    });
 
     apiProcess.stdout?.on('data', (data) => {
-      console.log(data)
-    })
+      // Optional: console.log(`[API]: ${data}`);
+    });
 
     apiProcess.stderr?.on('data', (data) => {
-      console.error('API Error:', data)
-    })
+      console.error('[API Error]:', data.toString());
+    });
 
-    console.log('Launching API...')
+    // Resolve after 10 seconds
     setTimeout(() => {
-      console.log('API launched')
-      resolve()
-    }, 10000)
-  })
+      console.log('API wait period finished');
+      resolve();
+    }, 10000);
+  });
 }

@@ -29,6 +29,7 @@ module.exports = {
     '@typescript-eslint/prefer-nullish-coalescing': 'off',
     'space-before-function-paren': 'off',
     '@typescript-eslint/member-delimiter-style': 'off',
-    '@typescript-eslint/indent': 'off'
+    '@typescript-eslint/indent': 'off',
+    '@typescript-eslint/dot-notation': ['error', { allowKeywords: true }]
   }
 }
