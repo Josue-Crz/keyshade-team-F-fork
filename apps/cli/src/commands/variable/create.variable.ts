@@ -74,8 +74,9 @@ export default class CreateVariable extends BaseCommand {
     }
 
     const payload = {
-      name,
-      note,
+      projectSlug: projectSlug.trim(),
+      name: name.trim(),
+      note: note?.trim(),
       entries
     }
 
@@ -88,6 +89,7 @@ export default class CreateVariable extends BaseCommand {
       }
       return
     }
+
 
     const { data, error, success } =
       await ControllerInstance.getInstance().variableController.createVariable(
@@ -107,10 +109,10 @@ export default class CreateVariable extends BaseCommand {
   private async parseInput(options: CommandActionData['options']): Promise<{
     name: string
     note?: string
-    entries: Array<{ value: string; environmentSlug: string }>
+    entries?: Array<{ value: string; environmentSlug: string }>
   }> {
     let { name, note } = options
-    const { rawEntries } = options
+    const { entry: rawEntries } = options
 
     const entries: Array<{ value: string; environmentSlug: string }> = []
 
@@ -127,27 +129,20 @@ export default class CreateVariable extends BaseCommand {
 
     if (rawEntries) {
       for (const entry of rawEntries) {
-        // Check for entry format
-        if (!entry.match(/^[a-zA-Z0-9\-_+:[a-zA-Z0-9_\-!@#$%^&*()_+=[ ]+$/)) {
-          Logger.warn(
-            `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+        const idx = entry.indexOf('=')
+        if (idx <= 0 || idx === entry.length - 1) {
+          throw new Error(
+            `Invalid entry format. Expected <environment slug>=<value> but got ${entry}`
           )
-        } else {
-          const [environmentSlug, value] = entry
-            .split('=')
-            .map((s: string) => s.trim())
-
-          if (!environmentSlug || !value) {
-            Logger.warn(
-              `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
-            )
-          }
-
-          entries.push({
-            value,
-            environmentSlug
-          })
         }
+
+        const environmentSlug = entry.slice(0, idx).trim()
+        const value = entry.slice(idx + 1).trim()
+
+        entries.push({
+          value,
+          environmentSlug
+        })
       }
     }
 
