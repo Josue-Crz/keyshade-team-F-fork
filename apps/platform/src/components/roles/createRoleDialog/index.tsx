@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react'
 import type { AuthorityEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
-import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
+import { AlphaNumericStringSchema , ColorCodeAlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
 import type { ProjectEnvironmentComboType } from '../projectEnvironmentSelector'
 import ProjectEnvironmentSelector from '../projectEnvironmentSelector'
 import { Button } from '@/components/ui/button'
@@ -131,6 +131,21 @@ export default function CreateRoleDialog() {
       toast.error(result.error.errors[0]?.message ?? 'Invalid role name')
       return
     }
+
+    const raw = createRoleData.colorCode.trim()
+    const color = raw.startsWith('#') ? raw.slice(1) : raw
+    if (!color) {
+      toast.error('Role color is required')
+      return
+    }
+
+    const colorResult = ColorCodeAlphaNumericStringSchema.safeParse(color.toUpperCase())
+
+    if (!colorResult.success) {
+      toast.error(colorResult.error.errors[0]?.message ?? 'Invalid role color')
+      return
+    }
+
     
 
     setIsLoading(true)
@@ -160,6 +175,7 @@ export default function CreateRoleDialog() {
     createRole,
     createRoleData.name,
     createRoleData.description,
+    createRoleData.colorCode,
     handleCleanup,
     setIsCreateRolesOpen,
     setRoles,
