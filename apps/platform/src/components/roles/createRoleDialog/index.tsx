@@ -109,6 +109,7 @@ export default function CreateRoleDialog() {
 
   const handleCreateRole = useCallback(async () => {
     const name = createRoleData.name.trim()
+    const description = createRoleData.description.trim()
 
     if (name === '') {
       toast.error('Role name is required', {
@@ -118,6 +119,10 @@ export default function CreateRoleDialog() {
           </p>
         )
       })
+      return
+    }
+    if (description === '') {
+      toast.error('Role description is required')
       return
     }
     const result = AlphaNumericStringSchema.safeParse(name)
@@ -154,6 +159,7 @@ export default function CreateRoleDialog() {
   }, [
     createRole,
     createRoleData.name,
+    createRoleData.description,
     handleCleanup,
     setIsCreateRolesOpen,
     setRoles,
