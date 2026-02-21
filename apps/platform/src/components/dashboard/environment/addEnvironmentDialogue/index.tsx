@@ -2,6 +2,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
+import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
 import {
   Dialog,
   DialogTrigger,
@@ -53,6 +54,8 @@ export default function AddEnvironmentDialogue(): React.JSX.Element {
   )
 
   const handleAddEnvironment = useCallback(async () => {
+    const name = newEnvironmentData.environmentName.trim()
+    const description = newEnvironmentData.environmentDescription.trim()
     if (selectedProject) {
       if (isInvalidEnvironmentName) {
         toast.error('Environment name is required', {
@@ -63,6 +66,16 @@ export default function AddEnvironmentDialogue(): React.JSX.Element {
             </p>
           )
         })
+        return
+      }
+      if (description === '') {
+        toast.error('Environment description is required')
+        return
+      }
+      const result = AlphaNumericStringSchema.safeParse(name)
+      
+      if (!result.success) {
+        toast.error(result.error.errors[0]?.message ?? 'Invalid enviorment name')
         return
       }
 
@@ -108,7 +121,9 @@ export default function AddEnvironmentDialogue(): React.JSX.Element {
     setEnvironments,
     setProjectEnvironmentCount,
     setIsCreateEnvironmentOpen,
-    isInvalidEnvironmentName
+    isInvalidEnvironmentName,
+    newEnvironmentData.environmentName,
+    newEnvironmentData.environmentDescription
   ])
 
   return (
