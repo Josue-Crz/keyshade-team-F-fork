@@ -182,6 +182,8 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^10.0.3",
     "@semantic-release/release-notes-generator": "^14.0.0",
+    "@sentry/node": "^7.120.4",
+    "@sentry/profiling-node": "^7.120.4",
     "@types/node": "^20.19.26",
     "chalk": "^4.1.2",
     "class-validator": "^0.14.3",
