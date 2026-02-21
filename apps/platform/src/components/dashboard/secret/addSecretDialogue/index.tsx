@@ -2,6 +2,8 @@ import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
+import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
+import type { z } from 'zod'
 import { Input } from '../../../ui/input'
 import { Button } from '../../../ui/button'
 import {
@@ -64,6 +66,12 @@ export default function AddSecretDialog() {
     if (selectedProject) {
       if (requestData.name.trim() === '') {
         toast.error('Please enter a secret name')
+        return
+      }
+      try{
+        AlphaNumericStringSchema.parse(requestData.name)
+      } catch(e) {
+        toast.error((e as z.ZodError).errors[0].message)
         return
       }
 
