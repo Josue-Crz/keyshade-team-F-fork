@@ -3,7 +3,6 @@ import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
 import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
-import type { z } from 'zod'
 import { Input } from '../../../ui/input'
 import { Button } from '../../../ui/button'
 import {
@@ -63,17 +62,19 @@ export default function AddSecretDialog() {
   }, [setIsCreateSecretOpen, setRequestData, setEnvironmentValues])
 
   const handleAddSecret = useCallback(async () => {
+    const name = requestData.name.trim()
+
     if (selectedProject) {
-      if (requestData.name.trim() === '') {
+      if (name === '') {
         toast.error('Please enter a secret name')
         return
       }
-      try{
-        AlphaNumericStringSchema.parse(requestData.name)
-      } catch(e) {
-        toast.error((e as z.ZodError).errors[0].message)
-        return
-      }
+    const result = AlphaNumericStringSchema.safeParse(name)
+        
+    if (!result.success) {
+      toast.error(result.error.errors[0]?.message ?? 'Invalid secret name')
+      return
+    }
 
       setIsLoading(true)
       toast.loading('Creating secret...')

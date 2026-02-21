@@ -2,6 +2,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
+import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -62,11 +63,21 @@ export default function AddVariableDialogue(): React.JSX.Element {
   }, [setIsCreateVariableOpen, setRequestData, setEnvironmentValues])
 
   const handleAddVariable = useCallback(async () => {
+     const name = requestData.name.trim()
+
     if (selectedProject) {
-      if (requestData.name.trim() === '') {
+      if (name) {
         toast.error('Variable name is required')
         return
       }
+
+    // adding alphanumric validaton to requestData
+    const result = AlphaNumericStringSchema.safeParse(name)
+
+    if (!result.success) {
+      toast.error(result.error.errors[0]?.message ?? 'Invalid variable name')
+      return
+    }
 
       setIsLoading(true)
       toast.loading('Creating variable...')

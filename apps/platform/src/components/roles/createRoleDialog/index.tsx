@@ -4,7 +4,6 @@ import type { AuthorityEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
 import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
-import type { z } from 'zod'
 import type { ProjectEnvironmentComboType } from '../projectEnvironmentSelector'
 import ProjectEnvironmentSelector from '../projectEnvironmentSelector'
 import { Button } from '@/components/ui/button'
@@ -109,7 +108,9 @@ export default function CreateRoleDialog() {
   }, [])
 
   const handleCreateRole = useCallback(async () => {
-    if (createRoleData.name.trim() === '') {
+    const name = createRoleData.name.trim()
+
+    if (name === '') {
       toast.error('Role name is required', {
         description: (
           <p className="text-xs text-red-300">
@@ -119,10 +120,10 @@ export default function CreateRoleDialog() {
       })
       return
     }
-    try {
-      AlphaNumericStringSchema.parse(createRoleData.name)
-    } catch(e){
-      toast.error((e as z.ZodError).errors[0].message)
+    const result = AlphaNumericStringSchema.safeParse(name)
+    
+    if (!result.success) {
+      toast.error(result.error.errors[0]?.message ?? 'Invalid role name')
       return
     }
     
