@@ -3,6 +3,7 @@ import { useAtom } from 'jotai'
 import Cookies from 'js-cookie'
 import { toast } from 'sonner'
 import { posthog } from 'posthog-js'
+import type { z } from 'zod'
 import { LoadingSVG } from '@public/svg/shared'
 import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
 import ReferralDetailsForm from './onboarding slides/referral-details-form'
@@ -22,6 +23,7 @@ import {
 } from '@/components/ui/stepper'
 import { redirectTo } from '@/lib/redirect-to'
 
+const nameSchema = AlphaNumericStringSchema
 const totalSteps = 4
 
 export interface OnboardingData {
@@ -61,17 +63,13 @@ export default function OnboardingStepper() {
   )
 
   const validateName = (): boolean => {
-    const name = data.name.trim()
-    if (name === '') {
-      toast.error('Name cannot be empty')
+    try {
+      nameSchema.parse(data.name)
+      return true
+    } catch (e) {
+      toast.error((e as z.ZodError).errors[0].message)
       return false
     }
-    const result = AlphaNumericStringSchema.safeParse(name)
-    if (!result.success) {
-      toast.error(result.error.errors[0]?.message ?? 'Invalid name')
-      return false
-    }
-    return true
   }
 
   const handleNext = () => {

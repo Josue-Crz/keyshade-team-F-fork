@@ -3,7 +3,6 @@ import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
-import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
 import {
   Dialog,
   DialogTrigger,
@@ -45,17 +44,10 @@ export function AddWorkspaceDialog({
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
   const handleCreate = useCallback(async () => {
-    const trimmedName = name.trim()
-    if (trimmedName === '') {
+    if (!name.trim()) {
       return toast.error('Workspace name is empty', {
         description: 'Please enter a workspace name'
       })
-    }
-    const result = AlphaNumericStringSchema.safeParse(trimmedName)
-
-    if (!result.success) {
-      toast.error(result.error.errors[0]?.message ?? 'Invalid workspace name')
-      return
     }
 
     setIsLoading(true)

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import type { VercelEnvironmentMapping } from '@keyshade/common'
 import { Integrations } from '@keyshade/common'
 import type { EventTypeEnum, IntegrationTypeEnum } from '@keyshade/schema'
-import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
 import { useHttp } from '@/hooks/use-http'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 import ControllerInstance from '@/lib/controller-instance'
@@ -111,18 +110,10 @@ export function useSetupIntegration(
 
   // ── validate config without submitting ────────────────────────────────────
   const prepareMetadata = useCallback((): Record<string, string> | null => {
-    const name = formState.name.trim()
-    if (name === '') {
+    if (!formState.name.trim()) {
       toast.error('Name of integration is required')
       return null
     }
-    const result = AlphaNumericStringSchema.safeParse(name)
-
-    if (!result.success) {
-      toast.error(result.error.errors[0]?.message ?? 'Invalid integration name')
-      return null
-    }
-
     if (formState.selectedEvents.size === 0) {
       toast.error('At least one event trigger is required')
       return null
