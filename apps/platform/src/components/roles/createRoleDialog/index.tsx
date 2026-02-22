@@ -3,6 +3,10 @@ import React, { useCallback, useState } from 'react'
 import type { AuthorityEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
+import {
+  AlphaNumericStringSchema,
+  ColorCodeAlphaNumericStringSchema
+} from '@keyshade/schema/src/alphanumeric'
 import type { ProjectEnvironmentComboType } from '../projectEnvironmentSelector'
 import ProjectEnvironmentSelector from '../projectEnvironmentSelector'
 import { Button } from '@/components/ui/button'
@@ -107,7 +111,10 @@ export default function CreateRoleDialog() {
   }, [])
 
   const handleCreateRole = useCallback(async () => {
-    if (createRoleData.name.trim() === '') {
+    const name = createRoleData.name.trim()
+    const description = createRoleData.description.trim()
+
+    if (name === '') {
       toast.error('Role name is required', {
         description: (
           <p className="text-xs text-red-300">
@@ -115,6 +122,32 @@ export default function CreateRoleDialog() {
           </p>
         )
       })
+      return
+    }
+    if (description === '') {
+      toast.error('Role description is required')
+      return
+    }
+    const result = AlphaNumericStringSchema.safeParse(name)
+
+    if (!result.success) {
+      toast.error(result.error.errors[0]?.message ?? 'Invalid role name')
+      return
+    }
+
+    const raw = createRoleData.colorCode.trim()
+    const color = raw.startsWith('#') ? raw.slice(1) : raw
+    if (!color) {
+      toast.error('Role color is required')
+      return
+    }
+
+    const colorResult = ColorCodeAlphaNumericStringSchema.safeParse(
+      color.toUpperCase()
+    )
+
+    if (!colorResult.success) {
+      toast.error(colorResult.error.errors[0]?.message ?? 'Invalid role color')
       return
     }
 
@@ -144,6 +177,8 @@ export default function CreateRoleDialog() {
   }, [
     createRole,
     createRoleData.name,
+    createRoleData.description,
+    createRoleData.colorCode,
     handleCleanup,
     setIsCreateRolesOpen,
     setRoles,
@@ -163,8 +198,8 @@ export default function CreateRoleDialog() {
           <AddSVG /> Add Role
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[80vh] min-w-2xl overflow-auto rounded-[12px] border bg-[#1E1E1F]">
-        <div className="flex h-12.5 w-full flex-col items-start justify-center">
+      <DialogContent className="min-w-2xl h-[80vh] overflow-auto rounded-[12px] border bg-[#1E1E1F]">
+        <div className="h-12.5 flex w-full flex-col items-start justify-center">
           <DialogHeader className=" font-geist h-7.5 w-34 text-[1.125rem] font-semibold text-white ">
             Create Role
           </DialogHeader>
@@ -198,7 +233,7 @@ export default function CreateRoleDialog() {
             </div>
 
             {/* DESCRIPTION */}
-            <div className="flex h-22.5 w-full items-center justify-start gap-4">
+            <div className="h-22.5 flex w-full items-center justify-start gap-4">
               <Label
                 className="font-geist h-5 w-28 gap-1 text-left text-[0.875rem] font-medium "
                 htmlFor="description"
@@ -206,7 +241,7 @@ export default function CreateRoleDialog() {
                 Description
               </Label>
               <Textarea
-                className="col-span-3 h-22.5 w-[20rem] resize-none gap-1"
+                className="h-22.5 col-span-3 w-[20rem] resize-none gap-1"
                 id="description"
                 onChange={(e) =>
                   setCreateRoleData((prev) => ({
@@ -220,7 +255,7 @@ export default function CreateRoleDialog() {
             </div>
 
             {/* COLOR PICKER */}
-            <div className="flex h-22.5 w-full items-center justify-start gap-4">
+            <div className="h-22.5 flex w-full items-center justify-start gap-4">
               <Label
                 className="font-geist h-5 w-28 gap-1 text-left text-[0.875rem] font-medium "
                 htmlFor="color"
