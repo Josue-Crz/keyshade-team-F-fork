@@ -6,6 +6,7 @@ import type {
 import BaseCommand from '@/commands/base.command'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
+import { UpdateVariableRequestSchema } from '@keyshade/schema/raw'
 
 export default class UpdateVariable extends BaseCommand {
   getName(): string {
@@ -64,12 +65,33 @@ export default class UpdateVariable extends BaseCommand {
   async action({ args, options }: CommandActionData): Promise<void> {
     const [variableSlug] = args
 
+    if (!variableSlug) {
+      Logger.error('Variable slug is required')
+      return
+    }
+
+    const { name, note, entries } = await this.parseInput(options)
+
+    const payload = {
+      variableSlug: variableSlug.trim(),
+      name: name?.trim(),
+      note: note?.trim(),
+      entries
+    }
+
+    const parsedPayload = UpdateVariableRequestSchema.safeParse(payload)
+
+    if (!parsedPayload.success) {
+      Logger.error('Invalid input:')
+      for (const issue of parsedPayload.error.issues) {
+        Logger.error(`- ${issue.path.join('.') || 'input'} : ${issue.message}`)
+      }
+      return
+    }
+
     const { error, success } =
       await ControllerInstance.getInstance().variableController.updateVariable(
-        {
-          variableSlug,
-          ...(await this.parseInput(options))
-        },
+        parsedPayload.data,
         this.headers
       )
 
@@ -80,7 +102,7 @@ export default class UpdateVariable extends BaseCommand {
     }
   }
 
-  private async parseInput(options: any): Promise<{
+  private async parseInput(options: CommandActionData['options']): Promise<{
     name?: string
     note?: string
     entries?: Array<{ value: string; environmentSlug: string }>
@@ -91,27 +113,21 @@ export default class UpdateVariable extends BaseCommand {
 
     if (rawEntries) {
       for (const entry of rawEntries) {
-        // Check for entry format
-        if (!entry.match(/^[a-zA-Z0-9\-_+:[a-zA-Z0-9_\-!@#$%^&*()_+=[ ]+$/)) {
-          Logger.warn(
-            `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+        const idx = entry.indexOf('=')
+
+        if (idx <= 0 || idx === entry.length - 1) {
+          throw new Error(
+            `Invalid entry format. Expected format is <environment slug>=<value> but got ${entry}`
           )
-        } else {
-          const [environmentSlug, value] = entry
-            .split('=')
-            .map((s: string) => s.trim())
-
-          if (!environmentSlug || !value) {
-            Logger.warn(
-              `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
-            )
-          }
-
-          entries.push({
-            value,
-            environmentSlug
-          })
         }
+
+        const environmentSlug = entry.slice(0, idx).trim()
+        const value = entry.slice(idx + 1).trim()
+
+        entries.push({
+          value,
+          environmentSlug
+        })
       }
     }
 
