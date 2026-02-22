@@ -69,12 +69,12 @@ export default function AddSecretDialog() {
         toast.error('Please enter a secret name')
         return
       }
-    const result = AlphaNumericStringSchema.safeParse(name)
-        
-    if (!result.success) {
-      toast.error(result.error.errors[0]?.message ?? 'Invalid secret name')
-      return
-    }
+      const result = AlphaNumericStringSchema.safeParse(name)
+
+      if (!result.success) {
+        toast.error(result.error.errors[0]?.message ?? 'Invalid secret name')
+        return
+      }
 
       setIsLoading(true)
       toast.loading('Creating secret...')

@@ -117,7 +117,7 @@ export function useSetupIntegration(
       return null
     }
     const result = AlphaNumericStringSchema.safeParse(name)
-        
+
     if (!result.success) {
       toast.error(result.error.errors[0]?.message ?? 'Invalid integration name')
       return null

@@ -73,9 +73,11 @@ export default function AddEnvironmentDialogue(): React.JSX.Element {
         return
       }
       const result = AlphaNumericStringSchema.safeParse(name)
-      
+
       if (!result.success) {
-        toast.error(result.error.errors[0]?.message ?? 'Invalid enviorment name')
+        toast.error(
+          result.error.errors[0]?.message ?? 'Invalid enviorment name'
+        )
         return
       }
 

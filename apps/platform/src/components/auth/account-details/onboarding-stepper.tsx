@@ -61,16 +61,16 @@ export default function OnboardingStepper() {
   )
 
   const validateName = (): boolean => {
-    const name = data.name.trim();
-    if(name === ''){
+    const name = data.name.trim()
+    if (name === '') {
       toast.error('Name cannot be empty')
       return false
     }
     const result = AlphaNumericStringSchema.safeParse(name)
     if (!result.success) {
-          toast.error(result.error.errors[0]?.message ?? 'Invalid name')
-          return false
-        }
+      toast.error(result.error.errors[0]?.message ?? 'Invalid name')
+      return false
+    }
     return true
   }
 

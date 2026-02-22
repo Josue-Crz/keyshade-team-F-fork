@@ -63,21 +63,21 @@ export default function AddVariableDialogue(): React.JSX.Element {
   }, [setIsCreateVariableOpen, setRequestData, setEnvironmentValues])
 
   const handleAddVariable = useCallback(async () => {
-     const name = requestData.name.trim()
+    const name = requestData.name.trim()
 
     if (selectedProject) {
-      if (name) {
+      if (name === '') {
         toast.error('Variable name is required')
         return
       }
 
-    // adding alphanumric validaton to requestData
-    const result = AlphaNumericStringSchema.safeParse(name)
+      // adding alphanumric validaton to requestData
+      const result = AlphaNumericStringSchema.safeParse(name)
 
-    if (!result.success) {
-      toast.error(result.error.errors[0]?.message ?? 'Invalid variable name')
-      return
-    }
+      if (!result.success) {
+        toast.error(result.error.errors[0]?.message ?? 'Invalid variable name')
+        return
+      }
 
       setIsLoading(true)
       toast.loading('Creating variable...')

@@ -52,7 +52,7 @@ export function AddWorkspaceDialog({
       })
     }
     const result = AlphaNumericStringSchema.safeParse(trimmedName)
-        
+
     if (!result.success) {
       toast.error(result.error.errors[0]?.message ?? 'Invalid workspace name')
       return
