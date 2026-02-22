@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
+import { AlphaNumericStringSchema } from '@keyshade/schema/src/alphanumeric'
 import { Input } from '../../../ui/input'
 import { Button } from '../../../ui/button'
 import {
@@ -61,9 +62,17 @@ export default function AddSecretDialog() {
   }, [setIsCreateSecretOpen, setRequestData, setEnvironmentValues])
 
   const handleAddSecret = useCallback(async () => {
+    const name = requestData.name.trim()
+
     if (selectedProject) {
-      if (requestData.name.trim() === '') {
+      if (name === '') {
         toast.error('Please enter a secret name')
+        return
+      }
+      const result = AlphaNumericStringSchema.safeParse(name)
+
+      if (!result.success) {
+        toast.error(result.error.errors[0]?.message ?? 'Invalid secret name')
         return
       }
 
