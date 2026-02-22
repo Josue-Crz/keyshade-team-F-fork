@@ -5,16 +5,20 @@ import {
   IsOptional,
   IsString,
   Length,
-  ValidateNested
+  ValidateNested,
+  Matches
 } from 'class-validator'
 import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
 import { Entry } from '@/common/dto/entry.dto'
+import { IsDescriptive } from '@/decorators/validation.decorator'
 
 export class CreateSecret {
   @NonEmptyTrimmedString()
+  @Matches(/^[a-zA-Z0-9_ ]+$/) // allow spaces and underscores
   name: string
 
   @IsOptional()
+  @IsDescriptive()
   @Length(0, 100)
   note?: string
 
