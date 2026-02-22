@@ -6,6 +6,7 @@ import type {
 import BaseCommand from '@/commands/base.command'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
+import { UpdateVariableRequestSchema } from '@keyshade/schema/raw'
 
 export default class UpdateVariable extends BaseCommand {
   getName(): string {
@@ -64,12 +65,33 @@ export default class UpdateVariable extends BaseCommand {
   async action({ args, options }: CommandActionData): Promise<void> {
     const [variableSlug] = args
 
+    if (!variableSlug) {
+      Logger.error('Variable slug is required')
+      return
+    }
+
+    const { name, note, entries } = await this.parseInput(options)
+
+    const payload = {
+      variableSlug: variableSlug.trim(),
+      name: name?.trim(),
+      note: note?.trim(),
+      entries
+    }
+
+    const parsedPayload = UpdateVariableRequestSchema.safeParse(payload)
+
+    if (!parsedPayload.success) {
+      Logger.error('Invalid input:')
+      for (const issue of parsedPayload.error.issues) {
+        Logger.error(`- ${issue.path.join('.') || 'input'} : ${issue.message}`)
+      }
+      return
+    }
+
     const { error, success } =
       await ControllerInstance.getInstance().variableController.updateVariable(
-        {
-          variableSlug,
-          ...(await this.parseInput(options))
-        },
+        parsedPayload.data,
         this.headers
       )
 
